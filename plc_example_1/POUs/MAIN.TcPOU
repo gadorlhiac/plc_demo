@@ -3,11 +3,33 @@
   <POU Name="MAIN" Id="{809816d0-c50d-4863-8190-41fb6126d3d4}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MAIN
 VAR
-	nCounter: ULINT := 10;
+    {attribute 'pytmc' := '
+        pv: PLC:DEMO:COUNTER
+    '}
+    nCounter: UDINT := 10;
+    sError: STRING;
+
+    {attribute 'TcLinkTo' := 'TIIB[Term 3 (EL5042)]^FB Inputs Channel 1^Position'}
+    // Special syntax for input variable
+    nEncoderCount AT %I*: ULINT;
+    // pragma for linking
+    {attribute 'TcLinkTo' := 'TIIB[Term 6 (EL2004)]^Channel 1^Output'}
+    // Special syntax for output variable
+    (*
+        Multi-line
+        comment
+    *)
+    bOutput AT %Q*: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[nCounter := nCounter + 1;]]></ST>
+      <ST><![CDATA[nCounter := nCounter + 1;
+sError := F_MotionErrorCodeLookup(nCounter);
+bOutput := TRUE;
+
+IF sError = F_MotionErrorCodeLookup(1) THEN
+    nCounter := nCounter + 1;
+END_IF]]></ST>
     </Implementation>
   </POU>
 </TcPlcObject>
